@@ -22,7 +22,8 @@
   },
   "dependencies": {
     "@pulse/event-schemas": "workspace:*",
-    "kafkajs": "^2.2.4"
+    "kafkajs": "^2.2.4",
+    "zod": "^3.25.51"
   },
   "devDependencies": {
     "@types/node": "^22.15.29",

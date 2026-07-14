@@ -1,5 +1,10 @@
-﻿/**
- * Thin typed Kafka client wrapper over kafkajs.
- */
-
-export const KAFKA_CLIENT_PACKAGE = "@pulse/kafka-client" as const;
+﻿export {
+  PulseKafkaClient,
+  SchemaValidationError,
+} from "./client.js";
+export type {
+  ConsumeContext,
+  ConsumeTypedOptions,
+  PulseKafkaLogger,
+  TypedMessageHandler,
+} from "./client.js";
