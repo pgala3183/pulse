@@ -15,6 +15,7 @@ import {
 import { PulseKafkaClient } from "@pulse/kafka-client";
 import { PubSub } from "graphql-subscriptions";
 import { randomUUID } from "node:crypto";
+import { APP_CONFIG, type ApiGatewayConfig } from "../config";
 import { PULSE_KAFKA_CLIENT } from "../kafka/live-events.bridge";
 import { GRAPHQL_PUB_SUB, LIVE_CHANNELS } from "../pubsub.tokens";
 import { GatewayStore } from "../store/gateway.store";
@@ -33,6 +34,7 @@ export class GatewayResolver {
     private readonly store: GatewayStore,
     @Inject(PULSE_KAFKA_CLIENT) private readonly kafkaClient: PulseKafkaClient,
     @Inject(GRAPHQL_PUB_SUB) private readonly pubSub: PubSub,
+    @Inject(APP_CONFIG) private readonly config: ApiGatewayConfig,
   ) {}
 
   @Query(() => [StreamIngestion], { description: "List known stream ingestion sessions" })
@@ -161,7 +163,7 @@ export class GatewayResolver {
   }
 
   private async publishIngestionCommand(command: IngestionCommandEvent): Promise<void> {
-    if (process.env["KAFKA_PUBLISH_DISABLED"] === "true") {
+    if (this.config.kafkaPublishDisabled) {
       return;
     }
     await this.kafkaClient.publishTyped(

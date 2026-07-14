@@ -9,6 +9,7 @@ import {
 import { PulseKafkaClient } from "@pulse/kafka-client";
 import { PubSub } from "graphql-subscriptions";
 import { Kafka } from "kafkajs";
+import { APP_CONFIG, type ApiGatewayConfig } from "../config";
 import { GRAPHQL_PUB_SUB, LIVE_CHANNELS } from "../pubsub.tokens";
 import { GatewayStore } from "../store/gateway.store";
 
@@ -22,16 +23,17 @@ export class LiveEventsBridge implements OnModuleInit, OnModuleDestroy {
   constructor(
     @Inject(PULSE_KAFKA_CLIENT) private readonly kafkaClient: PulseKafkaClient,
     @Inject(GRAPHQL_PUB_SUB) private readonly pubSub: PubSub,
+    @Inject(APP_CONFIG) private readonly config: ApiGatewayConfig,
     private readonly store: GatewayStore,
   ) {}
 
   async onModuleInit(): Promise<void> {
-    if (process.env["KAFKA_BRIDGE_DISABLED"] === "true") {
-      this.logger.warn("Kafka live-events bridge disabled (KAFKA_BRIDGE_DISABLED=true)");
+    if (this.config.kafkaBridgeDisabled) {
+      this.logger.warn("Kafka live-events bridge disabled");
       return;
     }
 
-    const groupId = process.env["KAFKA_GROUP_ID"] ?? "pulse-api-gateway";
+    const groupId = this.config.kafkaGroupId;
 
     this.stoppers.push(
       await this.kafkaClient.consumeTyped(
@@ -62,12 +64,10 @@ export class LiveEventsBridge implements OnModuleInit, OnModuleDestroy {
     await this.kafkaClient.disconnect();
   }
 
-  /** Used by integration tests to simulate Kafka → GraphQL fan-out. */
   async ingestSentimentEvent(event: SentimentResultEvent): Promise<void> {
     await this.publishSentiment(event);
   }
 
-  /** Used by integration tests to simulate Kafka → GraphQL fan-out. */
   async ingestBrandMentionEvent(event: BrandMentionEvent): Promise<void> {
     await this.publishBrandMention(event);
   }
@@ -87,16 +87,11 @@ export class LiveEventsBridge implements OnModuleInit, OnModuleDestroy {
   }
 }
 
-export function createPulseKafkaClientFromEnv(): PulseKafkaClient {
-  const brokers = (process.env["KAFKA_BROKERS"] ?? "localhost:9092")
-    .split(",")
-    .map((broker) => broker.trim())
-    .filter(Boolean);
-
-  const kafka = new Kafka({
-    clientId: process.env["KAFKA_CLIENT_ID"] ?? "pulse-api-gateway",
-    brokers: brokers.length > 0 ? brokers : ["localhost:9092"],
-  });
-
-  return new PulseKafkaClient(kafka);
+export function createPulseKafkaClient(config: ApiGatewayConfig): PulseKafkaClient {
+  return new PulseKafkaClient(
+    new Kafka({
+      clientId: config.kafkaClientId,
+      brokers: config.kafkaBrokers,
+    }),
+  );
 }

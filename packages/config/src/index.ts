@@ -1,5 +1,16 @@
-﻿/**
- * Typed, validated environment and config loader.
- */
+﻿export { ConfigError, isSecretRef, loadConfig, loadConfigSync } from "./load-config";
+export type { LoadConfigOptions } from "./load-config";
 
-export const CONFIG_PACKAGE = "@pulse/config" as const;
+export {
+  DeploymentConfigSchema,
+  DeploymentEnvSchema,
+  KafkaConfigSchema,
+  booleanFromEnv,
+  portFromEnv,
+  resolveServiceBaseUrl,
+} from "./schemas";
+export type { DeploymentEnv, KafkaConfig } from "./schemas";
+
+export { createGcpSecretResolver } from "./secret-manager";
+
+export { z } from "zod";

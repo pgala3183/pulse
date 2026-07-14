@@ -1,17 +1,22 @@
 import {
   CanActivate,
   ExecutionContext,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { GqlExecutionContext } from "@nestjs/graphql";
 import type { Request } from "express";
+import { APP_CONFIG, type ApiGatewayConfig } from "../config";
 import { IS_PUBLIC_KEY } from "./public.decorator";
 
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(
+    private readonly reflector: Reflector,
+    @Inject(APP_CONFIG) private readonly config: ApiGatewayConfig,
+  ) {}
 
   canActivate(context: ExecutionContext): boolean {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
@@ -22,7 +27,7 @@ export class ApiKeyGuard implements CanActivate {
       return true;
     }
 
-    const expected = process.env["PULSE_API_KEY"] ?? "dev-api-key";
+    const expected = this.config.apiKey;
     const request = this.getRequest(context);
     const provided =
       request.header("x-api-key") ?? this.bearerToken(request.header("authorization"));

@@ -1,11 +1,13 @@
 ﻿import "reflect-metadata";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
+import { loadVideoServiceConfig } from "./config";
 
 async function bootstrap(): Promise<void> {
+  const config = await loadVideoServiceConfig();
   const app = await NestFactory.create(AppModule);
   app.enableShutdownHooks();
-  await app.listen(Number(process.env["PORT"] ?? 3003));
+  await app.listen(config.port);
 }
 
 void bootstrap();

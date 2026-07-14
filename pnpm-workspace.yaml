@@ -10,3 +10,4 @@ allowBuilds:
   sharp: true
   "@apollo/protobufjs": true
   "@swc/core": true
+  protobufjs: true

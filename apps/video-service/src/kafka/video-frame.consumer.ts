@@ -1,6 +1,7 @@
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { KafkaTopics, VideoFrameEventSchema } from "@pulse/event-schemas";
 import { PulseKafkaClient } from "@pulse/kafka-client";
+import { APP_CONFIG, type VideoServiceConfig } from "../config";
 import { VIDEO_KAFKA_CLIENT, VideoFrameProcessor } from "../processing/video-frame.processor";
 
 @Injectable()
@@ -10,11 +11,12 @@ export class VideoFrameConsumer implements OnModuleInit, OnModuleDestroy {
 
   constructor(
     @Inject(VIDEO_KAFKA_CLIENT) private readonly kafka: PulseKafkaClient,
+    @Inject(APP_CONFIG) private readonly config: VideoServiceConfig,
     private readonly processor: VideoFrameProcessor,
   ) {}
 
   async onModuleInit(): Promise<void> {
-    if (process.env["VIDEO_KAFKA_CONSUMER_DISABLED"] === "true") {
+    if (this.config.kafkaConsumerDisabled) {
       this.logger.warn("Video frame Kafka consumer disabled");
       return;
     }
@@ -25,7 +27,7 @@ export class VideoFrameConsumer implements OnModuleInit, OnModuleDestroy {
       async (frame) => {
         await this.processor.processFrame(frame);
       },
-      { groupId: process.env["KAFKA_GROUP_ID"] ?? "pulse-video-service" },
+      { groupId: this.config.kafkaGroupId },
     );
     this.stop = handle.stop;
   }

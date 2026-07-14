@@ -2,6 +2,11 @@
 import { PulseKafkaClient } from "@pulse/kafka-client";
 import { MlClient } from "@pulse/ml-client";
 import { Kafka } from "kafkajs";
+import {
+  APP_CONFIG,
+  loadSentimentServiceConfig,
+  type SentimentServiceConfig,
+} from "./config";
 import { InMemorySentimentRepository } from "./db/repository";
 import { SentimentConsumers } from "./kafka/sentiment.consumers";
 import {
@@ -18,20 +23,26 @@ import { InMemorySentimentCache } from "./redis/cache";
     SentimentProcessor,
     SentimentConsumers,
     {
+      provide: APP_CONFIG,
+      useFactory: async () => loadSentimentServiceConfig(),
+    },
+    {
       provide: SENTIMENT_KAFKA_CLIENT,
-      useFactory: () =>
+      inject: [APP_CONFIG],
+      useFactory: (config: SentimentServiceConfig) =>
         new PulseKafkaClient(
           new Kafka({
-            clientId: process.env["KAFKA_CLIENT_ID"] ?? "pulse-sentiment-service",
-            brokers: (process.env["KAFKA_BROKERS"] ?? "localhost:9092").split(","),
+            clientId: config.kafkaClientId,
+            brokers: config.kafkaBrokers,
           }),
         ),
     },
     {
       provide: SENTIMENT_ML_CLIENT,
-      useFactory: () =>
+      inject: [APP_CONFIG],
+      useFactory: (config: SentimentServiceConfig) =>
         new MlClient({
-          baseUrl: process.env["ML_SERVICE_URL"] ?? "http://localhost:8000",
+          baseUrl: config.mlServiceUrl,
         }),
     },
     {
@@ -43,6 +54,6 @@ import { InMemorySentimentCache } from "./redis/cache";
       useClass: InMemorySentimentCache,
     },
   ],
-  exports: [SentimentProcessor],
+  exports: [SentimentProcessor, APP_CONFIG],
 })
 export class AppModule {}

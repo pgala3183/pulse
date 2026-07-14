@@ -1,9 +1,7 @@
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
-import {
-  IngestionCommandEventSchema,
-  KafkaTopics,
-} from "@pulse/event-schemas";
+import { IngestionCommandEventSchema, KafkaTopics } from "@pulse/event-schemas";
 import { PulseKafkaClient } from "@pulse/kafka-client";
+import { APP_CONFIG, type ChatServiceConfig } from "./config";
 import { CHAT_KAFKA_CLIENT, ChatIngestionService } from "./chat-ingestion.service";
 
 @Injectable()
@@ -13,16 +11,16 @@ export class IngestionCommandConsumer implements OnModuleInit, OnModuleDestroy {
 
   constructor(
     @Inject(CHAT_KAFKA_CLIENT) private readonly kafka: PulseKafkaClient,
+    @Inject(APP_CONFIG) private readonly config: ChatServiceConfig,
     private readonly ingestion: ChatIngestionService,
   ) {}
 
   async onModuleInit(): Promise<void> {
-    if (process.env["CHAT_KAFKA_CONSUMER_DISABLED"] === "true") {
+    if (this.config.kafkaConsumerDisabled) {
       this.logger.warn("Ingestion command consumer disabled");
       return;
     }
 
-    const groupId = process.env["KAFKA_GROUP_ID"] ?? "pulse-chat-service";
     const handle = await this.kafka.consumeTyped(
       KafkaTopics.INGESTION_COMMANDS,
       IngestionCommandEventSchema,
@@ -37,7 +35,7 @@ export class IngestionCommandConsumer implements OnModuleInit, OnModuleDestroy {
         }
         await this.ingestion.stop(command.platform, command.streamId);
       },
-      { groupId },
+      { groupId: this.config.kafkaGroupId },
     );
     this.stopConsumer = handle.stop;
   }

@@ -1,6 +1,11 @@
 ﻿import { Module } from "@nestjs/common";
 import { PulseKafkaClient } from "@pulse/kafka-client";
 import { Kafka } from "kafkajs";
+import {
+  APP_CONFIG,
+  loadRecommendationServiceConfig,
+  type RecommendationServiceConfig,
+} from "./config";
 import { RecommendationConsumer } from "./kafka/recommendation.consumer";
 import {
   RECOMMENDATION_KAFKA_CLIENT,
@@ -12,16 +17,21 @@ import {
     RecommendationProcessor,
     RecommendationConsumer,
     {
+      provide: APP_CONFIG,
+      useFactory: async () => loadRecommendationServiceConfig(),
+    },
+    {
       provide: RECOMMENDATION_KAFKA_CLIENT,
-      useFactory: () =>
+      inject: [APP_CONFIG],
+      useFactory: (config: RecommendationServiceConfig) =>
         new PulseKafkaClient(
           new Kafka({
-            clientId: process.env["KAFKA_CLIENT_ID"] ?? "pulse-recommendation-service",
-            brokers: (process.env["KAFKA_BROKERS"] ?? "localhost:9092").split(","),
+            clientId: config.kafkaClientId,
+            brokers: config.kafkaBrokers,
           }),
         ),
     },
   ],
-  exports: [RecommendationProcessor],
+  exports: [RecommendationProcessor, APP_CONFIG],
 })
 export class AppModule {}

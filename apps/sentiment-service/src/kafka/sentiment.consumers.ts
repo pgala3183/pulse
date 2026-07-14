@@ -5,6 +5,7 @@ import {
   TranscriptSegmentEventSchema,
 } from "@pulse/event-schemas";
 import { PulseKafkaClient } from "@pulse/kafka-client";
+import { APP_CONFIG, type SentimentServiceConfig } from "../config";
 import {
   SENTIMENT_KAFKA_CLIENT,
   SentimentProcessor,
@@ -17,16 +18,17 @@ export class SentimentConsumers implements OnModuleInit, OnModuleDestroy {
 
   constructor(
     @Inject(SENTIMENT_KAFKA_CLIENT) private readonly kafka: PulseKafkaClient,
+    @Inject(APP_CONFIG) private readonly config: SentimentServiceConfig,
     private readonly processor: SentimentProcessor,
   ) {}
 
   async onModuleInit(): Promise<void> {
-    if (process.env["SENTIMENT_KAFKA_CONSUMER_DISABLED"] === "true") {
+    if (this.config.kafkaConsumerDisabled) {
       this.logger.warn("Sentiment Kafka consumers disabled");
       return;
     }
 
-    const groupId = process.env["KAFKA_GROUP_ID"] ?? "pulse-sentiment-service";
+    const groupId = this.config.kafkaGroupId;
 
     const chat = await this.kafka.consumeTyped(
       KafkaTopics.CHAT_MESSAGES,

@@ -4,21 +4,8 @@ import { Kafka } from "kafkajs";
 import { ChatAdapterFactory } from "./chat-adapter.factory";
 import { CHAT_KAFKA_CLIENT, ChatIngestionService } from "./chat-ingestion.service";
 import { ChatController } from "./chat.controller";
+import { APP_CONFIG, loadChatServiceConfig, type ChatServiceConfig } from "./config";
 import { IngestionCommandConsumer } from "./ingestion-command.consumer";
-
-export function createChatKafkaClientFromEnv(): PulseKafkaClient {
-  const brokers = (process.env["KAFKA_BROKERS"] ?? "localhost:9092")
-    .split(",")
-    .map((broker) => broker.trim())
-    .filter(Boolean);
-
-  return new PulseKafkaClient(
-    new Kafka({
-      clientId: process.env["KAFKA_CLIENT_ID"] ?? "pulse-chat-service",
-      brokers: brokers.length > 0 ? brokers : ["localhost:9092"],
-    }),
-  );
-}
 
 @Module({
   controllers: [ChatController],
@@ -27,10 +14,21 @@ export function createChatKafkaClientFromEnv(): PulseKafkaClient {
     ChatIngestionService,
     IngestionCommandConsumer,
     {
+      provide: APP_CONFIG,
+      useFactory: async () => loadChatServiceConfig(),
+    },
+    {
       provide: CHAT_KAFKA_CLIENT,
-      useFactory: () => createChatKafkaClientFromEnv(),
+      inject: [APP_CONFIG],
+      useFactory: (config: ChatServiceConfig) =>
+        new PulseKafkaClient(
+          new Kafka({
+            clientId: config.kafkaClientId,
+            brokers: config.kafkaBrokers,
+          }),
+        ),
     },
   ],
-  exports: [ChatIngestionService, ChatAdapterFactory, CHAT_KAFKA_CLIENT],
+  exports: [ChatIngestionService, ChatAdapterFactory, CHAT_KAFKA_CLIENT, APP_CONFIG],
 })
 export class AppModule {}

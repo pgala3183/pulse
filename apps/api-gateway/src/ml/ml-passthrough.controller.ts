@@ -1,17 +1,17 @@
-import { Public } from "../auth/public.decorator";
-import { Controller, Get, ServiceUnavailableException } from "@nestjs/common";
+import { Controller, Get, Inject, ServiceUnavailableException } from "@nestjs/common";
 import { SkipThrottle } from "@nestjs/throttler";
+import { Public } from "../auth/public.decorator";
+import { APP_CONFIG, type ApiGatewayConfig } from "../config";
 
 @Controller("ml")
 export class MlPassthroughController {
+  constructor(@Inject(APP_CONFIG) private readonly config: ApiGatewayConfig) {}
+
   @Public()
   @SkipThrottle()
   @Get("health")
   async health(): Promise<{ status: string; upstream: unknown }> {
-    const baseUrl = (process.env["ML_SERVICE_URL"] ?? "http://localhost:8000").replace(
-      /\/$/,
-      "",
-    );
+    const baseUrl = this.config.mlServiceUrl.replace(/\/$/, "");
 
     try {
       const response = await fetch(`${baseUrl}/health`, {

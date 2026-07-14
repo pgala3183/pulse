@@ -6,6 +6,7 @@ import {
   SentimentResultEventSchema,
 } from "@pulse/event-schemas";
 import { PulseKafkaClient } from "@pulse/kafka-client";
+import { APP_CONFIG, type AnalyticsServiceConfig } from "../config";
 import {
   ANALYTICS_KAFKA_CLIENT,
   AnalyticsProcessor,
@@ -18,16 +19,17 @@ export class AnalyticsConsumers implements OnModuleInit, OnModuleDestroy {
 
   constructor(
     @Inject(ANALYTICS_KAFKA_CLIENT) private readonly kafka: PulseKafkaClient,
+    @Inject(APP_CONFIG) private readonly config: AnalyticsServiceConfig,
     private readonly processor: AnalyticsProcessor,
   ) {}
 
   async onModuleInit(): Promise<void> {
-    if (process.env["ANALYTICS_KAFKA_CONSUMER_DISABLED"] === "true") {
+    if (this.config.kafkaConsumerDisabled) {
       this.logger.warn("Analytics Kafka consumers disabled");
       return;
     }
 
-    const groupId = process.env["KAFKA_GROUP_ID"] ?? "pulse-analytics-service";
+    const groupId = this.config.kafkaGroupId;
 
     this.stoppers.push(
       (

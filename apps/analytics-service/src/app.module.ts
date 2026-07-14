@@ -1,6 +1,11 @@
 ﻿import { Module } from "@nestjs/common";
 import { PulseKafkaClient } from "@pulse/kafka-client";
 import { Kafka } from "kafkajs";
+import {
+  APP_CONFIG,
+  loadAnalyticsServiceConfig,
+  type AnalyticsServiceConfig,
+} from "./config";
 import { InMemoryAnalyticsRepository } from "./db/repository";
 import { AnalyticsConsumers } from "./kafka/analytics.consumers";
 import {
@@ -14,12 +19,17 @@ import {
     AnalyticsProcessor,
     AnalyticsConsumers,
     {
+      provide: APP_CONFIG,
+      useFactory: async () => loadAnalyticsServiceConfig(),
+    },
+    {
       provide: ANALYTICS_KAFKA_CLIENT,
-      useFactory: () =>
+      inject: [APP_CONFIG],
+      useFactory: (config: AnalyticsServiceConfig) =>
         new PulseKafkaClient(
           new Kafka({
-            clientId: process.env["KAFKA_CLIENT_ID"] ?? "pulse-analytics-service",
-            brokers: (process.env["KAFKA_BROKERS"] ?? "localhost:9092").split(","),
+            clientId: config.kafkaClientId,
+            brokers: config.kafkaBrokers,
           }),
         ),
     },
@@ -28,6 +38,6 @@ import {
       useClass: InMemoryAnalyticsRepository,
     },
   ],
-  exports: [AnalyticsProcessor],
+  exports: [AnalyticsProcessor, APP_CONFIG],
 })
 export class AppModule {}

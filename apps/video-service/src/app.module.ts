@@ -2,6 +2,7 @@
 import { PulseKafkaClient } from "@pulse/kafka-client";
 import { MlClient } from "@pulse/ml-client";
 import { Kafka } from "kafkajs";
+import { APP_CONFIG, loadVideoServiceConfig, type VideoServiceConfig } from "./config";
 import { InMemorySponsorDetectionRepository } from "./db/repository";
 import { VideoFrameConsumer } from "./kafka/video-frame.consumer";
 import {
@@ -16,20 +17,26 @@ import {
     VideoFrameProcessor,
     VideoFrameConsumer,
     {
+      provide: APP_CONFIG,
+      useFactory: async () => loadVideoServiceConfig(),
+    },
+    {
       provide: VIDEO_KAFKA_CLIENT,
-      useFactory: () =>
+      inject: [APP_CONFIG],
+      useFactory: (config: VideoServiceConfig) =>
         new PulseKafkaClient(
           new Kafka({
-            clientId: process.env["KAFKA_CLIENT_ID"] ?? "pulse-video-service",
-            brokers: (process.env["KAFKA_BROKERS"] ?? "localhost:9092").split(","),
+            clientId: config.kafkaClientId,
+            brokers: config.kafkaBrokers,
           }),
         ),
     },
     {
       provide: VIDEO_ML_CLIENT,
-      useFactory: () =>
+      inject: [APP_CONFIG],
+      useFactory: (config: VideoServiceConfig) =>
         new MlClient({
-          baseUrl: process.env["ML_SERVICE_URL"] ?? "http://localhost:8000",
+          baseUrl: config.mlServiceUrl,
         }),
     },
     {
@@ -37,6 +44,6 @@ import {
       useClass: InMemorySponsorDetectionRepository,
     },
   ],
-  exports: [VideoFrameProcessor],
+  exports: [VideoFrameProcessor, APP_CONFIG],
 })
 export class AppModule {}

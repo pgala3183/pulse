@@ -1,6 +1,7 @@
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { AnalyticsRollupEventSchema, KafkaTopics } from "@pulse/event-schemas";
 import { PulseKafkaClient } from "@pulse/kafka-client";
+import { APP_CONFIG, type RecommendationServiceConfig } from "../config";
 import {
   RECOMMENDATION_KAFKA_CLIENT,
   RecommendationProcessor,
@@ -13,11 +14,12 @@ export class RecommendationConsumer implements OnModuleInit, OnModuleDestroy {
 
   constructor(
     @Inject(RECOMMENDATION_KAFKA_CLIENT) private readonly kafka: PulseKafkaClient,
+    @Inject(APP_CONFIG) private readonly config: RecommendationServiceConfig,
     private readonly processor: RecommendationProcessor,
   ) {}
 
   async onModuleInit(): Promise<void> {
-    if (process.env["RECOMMENDATION_KAFKA_CONSUMER_DISABLED"] === "true") {
+    if (this.config.kafkaConsumerDisabled) {
       this.logger.warn("Recommendation Kafka consumer disabled");
       return;
     }
@@ -28,7 +30,7 @@ export class RecommendationConsumer implements OnModuleInit, OnModuleDestroy {
       async (rollup) => {
         await this.processor.onAnalyticsRollup(rollup);
       },
-      { groupId: process.env["KAFKA_GROUP_ID"] ?? "pulse-recommendation-service" },
+      { groupId: this.config.kafkaGroupId },
     );
     this.stop = handle.stop;
   }

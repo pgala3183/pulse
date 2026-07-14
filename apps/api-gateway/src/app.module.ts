@@ -6,9 +6,10 @@ import { ThrottlerModule } from "@nestjs/throttler";
 import { PubSub } from "graphql-subscriptions";
 import { ApiKeyGuard } from "./auth/api-key.guard";
 import { GqlThrottlerGuard } from "./auth/gql-throttler.guard";
+import { APP_CONFIG, loadApiGatewayConfig } from "./config";
 import { GatewayResolver } from "./graphql/gateway.resolver";
 import {
-  createPulseKafkaClientFromEnv,
+  createPulseKafkaClient,
   LiveEventsBridge,
   PULSE_KAFKA_CLIENT,
 } from "./kafka/live-events.bridge";
@@ -88,12 +89,18 @@ import { GatewayStore } from "./store/gateway.store";
     GatewayResolver,
     LiveEventsBridge,
     {
+      provide: APP_CONFIG,
+      useFactory: async () => loadApiGatewayConfig(),
+    },
+    {
       provide: GRAPHQL_PUB_SUB,
       useValue: new PubSub(),
     },
     {
       provide: PULSE_KAFKA_CLIENT,
-      useFactory: () => createPulseKafkaClientFromEnv(),
+      inject: [APP_CONFIG],
+      useFactory: (config: Awaited<ReturnType<typeof loadApiGatewayConfig>>) =>
+        createPulseKafkaClient(config),
     },
     {
       provide: APP_GUARD,
@@ -104,6 +111,6 @@ import { GatewayStore } from "./store/gateway.store";
       useClass: ApiKeyGuard,
     },
   ],
-  exports: [GatewayStore, LiveEventsBridge, GRAPHQL_PUB_SUB, PULSE_KAFKA_CLIENT],
+  exports: [GatewayStore, LiveEventsBridge, GRAPHQL_PUB_SUB, PULSE_KAFKA_CLIENT, APP_CONFIG],
 })
 export class AppModule {}
