@@ -1,0 +1,5 @@
+{
+  "knownBrands": ["Acme", "NovaEnergy", "PulsePay"],
+  "positiveLexicon": ["love", "great", "awesome", "good", "amazing", "best"],
+  "negativeLexicon": ["hate", "terrible", "awful", "bad", "worst", "suck"]
+}

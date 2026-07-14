@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { AnalysisSourceSchema } from "./analysis-source";
 import { StreamSourcedBaseSchema } from "./platform";
 
 export const BrandMentionSourceTypeSchema = z.enum([
@@ -17,6 +18,7 @@ export const BrandMentionEventSchema = StreamSourcedBaseSchema.extend({
   confidence: z.number().min(0).max(1),
   startMs: z.number().int().nonnegative().optional(),
   endMs: z.number().int().nonnegative().optional(),
+  analysisSource: AnalysisSourceSchema.optional(),
 }).refine(
   (mention) => {
     if (mention.startMs === undefined || mention.endMs === undefined) {

@@ -2,10 +2,11 @@
   "name": "@pulse/video-service",
   "version": "0.0.0",
   "private": true,
-  "description": "Video processing NestJS service",
+  "description": "Video processing NestJS service — frame sponsor detection",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "dev": "tsc -p tsconfig.build.json --watch",
+    "dev": "tsx watch src/main.ts",
+    "start": "node dist/main.js",
     "lint": "eslint src",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -15,13 +16,23 @@
     "@nestjs/common": "^11.1.3",
     "@nestjs/core": "^11.1.3",
     "@nestjs/platform-express": "^11.1.3",
+    "@pulse/event-schemas": "workspace:*",
+    "@pulse/kafka-client": "workspace:*",
+    "@pulse/ml-client": "workspace:*",
+    "drizzle-orm": "^0.44.2",
+    "kafkajs": "^2.2.4",
+    "postgres": "^3.4.7",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
+    "@nestjs/testing": "^11.1.3",
+    "@swc/core": "^1.11.29",
     "@types/node": "^22.15.29",
     "rimraf": "^6.0.1",
+    "tsx": "^4.19.4",
     "typescript": "^5.8.3",
+    "unplugin-swc": "^1.5.3",
     "vitest": "^3.2.1"
   }
 }

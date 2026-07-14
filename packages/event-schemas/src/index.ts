@@ -1,6 +1,9 @@
 ﻿export { PlatformSchema, StreamSourcedBaseSchema } from "./platform";
 export type { Platform, StreamSourcedBase } from "./platform";
 
+export { AnalysisSourceSchema } from "./analysis-source";
+export type { AnalysisSource } from "./analysis-source";
+
 export { ChatMessageEventSchema, ChatMessageKindSchema } from "./chat-message";
 export type { ChatMessageEvent, ChatMessageKind } from "./chat-message";
 

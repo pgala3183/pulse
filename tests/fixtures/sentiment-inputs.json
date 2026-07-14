@@ -1,0 +1,87 @@
+[
+  {
+    "id": "fixture-chat-positive-brand",
+    "event": {
+      "eventId": "550e8400-e29b-41d4-a716-446655441001",
+      "type": "chat.message",
+      "platform": "youtube",
+      "streamId": "stream-fixtures",
+      "occurredAt": "2026-07-13T22:00:00.000Z",
+      "messageId": "msg-1",
+      "userId": "u-1",
+      "username": "fan1",
+      "text": "Love this Acme sponsorship, so good!",
+      "kind": "regular"
+    },
+    "expected": {
+      "label": "positive",
+      "scoreMin": 0.2,
+      "brands": ["Acme"],
+      "sponsorRelevanceMin": 0.35
+    }
+  },
+  {
+    "id": "fixture-chat-super-chat",
+    "event": {
+      "eventId": "550e8400-e29b-41d4-a716-446655441002",
+      "type": "chat.message",
+      "platform": "youtube",
+      "streamId": "stream-fixtures",
+      "occurredAt": "2026-07-13T22:00:05.000Z",
+      "messageId": "msg-2",
+      "userId": "u-2",
+      "username": "fan2",
+      "text": "Go Acme! Love this",
+      "kind": "super_chat",
+      "amountMicros": 5000000,
+      "currency": "USD"
+    },
+    "expected": {
+      "label": "positive",
+      "scoreMin": 0.1,
+      "brands": ["Acme"],
+      "sponsorRelevanceMin": 0.5,
+      "paidSignal": true
+    }
+  },
+  {
+    "id": "fixture-chat-negative",
+    "event": {
+      "eventId": "550e8400-e29b-41d4-a716-446655441003",
+      "type": "chat.message",
+      "platform": "twitch",
+      "streamId": "stream-fixtures",
+      "occurredAt": "2026-07-13T22:00:10.000Z",
+      "messageId": "msg-3",
+      "userId": "u-3",
+      "username": "viewer3",
+      "text": "this is terrible and awful",
+      "kind": "regular"
+    },
+    "expected": {
+      "label": "negative",
+      "scoreMax": -0.2,
+      "brands": [],
+      "sponsorRelevanceMax": 0.35
+    }
+  },
+  {
+    "id": "fixture-transcript-brand",
+    "event": {
+      "eventId": "550e8400-e29b-41d4-a716-446655441004",
+      "type": "transcript.segment",
+      "platform": "twitch",
+      "streamId": "stream-fixtures",
+      "occurredAt": "2026-07-13T22:00:15.000Z",
+      "segmentId": "seg-1",
+      "text": "Today's stream is brought to you by NovaEnergy",
+      "startMs": 0,
+      "endMs": 2500
+    },
+    "expected": {
+      "label": "neutral",
+      "brands": ["NovaEnergy"],
+      "sponsorRelevanceMin": 0.3
+    }
+  }
+]

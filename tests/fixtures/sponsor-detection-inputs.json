@@ -1,0 +1,78 @@
+[
+  {
+    "id": "fixture-frame-logo",
+    "event": {
+      "eventId": "550e8400-e29b-41d4-a716-446655442001",
+      "type": "video.frame",
+      "platform": "twitch",
+      "streamId": "stream-fixtures",
+      "occurredAt": "2026-07-13T22:01:00.000Z",
+      "frameId": "frame-1",
+      "sequenceNumber": 1,
+      "width": 1920,
+      "height": 1080,
+      "mimeType": "image/jpeg",
+      "payloadRef": "s3://pulse/fixtures/frame-acme.jpg"
+    },
+    "mlResponse": {
+      "detections": [
+        {
+          "brand": "Acme",
+          "mentionText": "ACME",
+          "confidence": 0.91
+        }
+      ],
+      "confidence": 0.91
+    },
+    "expectedBrands": ["Acme"]
+  },
+  {
+    "id": "fixture-frame-ml-fail-lexical",
+    "event": {
+      "eventId": "550e8400-e29b-41d4-a716-446655442002",
+      "type": "video.frame",
+      "platform": "youtube",
+      "streamId": "stream-fixtures",
+      "occurredAt": "2026-07-13T22:01:05.000Z",
+      "frameId": "frame-2",
+      "sequenceNumber": 2,
+      "width": 1280,
+      "height": 720,
+      "mimeType": "image/jpeg",
+      "payloadRef": "s3://pulse/fixtures/frame-novaenergy-ref.txt"
+    },
+    "mlError": true,
+    "lexicalHint": "NovaEnergy watermark overlay",
+    "expectedBrands": ["NovaEnergy"],
+    "expectedSource": "lexical_fallback"
+  },
+  {
+    "id": "fixture-frame-low-confidence",
+    "event": {
+      "eventId": "550e8400-e29b-41d4-a716-446655442003",
+      "type": "video.frame",
+      "platform": "twitch",
+      "streamId": "stream-fixtures",
+      "occurredAt": "2026-07-13T22:01:10.000Z",
+      "frameId": "frame-3",
+      "sequenceNumber": 3,
+      "width": 1920,
+      "height": 1080,
+      "mimeType": "image/jpeg",
+      "payloadRef": "s3://pulse/fixtures/frame-acme-blurry.jpg"
+    },
+    "mlResponse": {
+      "detections": [
+        {
+          "brand": "Acme",
+          "mentionText": "acme",
+          "confidence": 0.2
+        }
+      ],
+      "confidence": 0.2
+    },
+    "lexicalHint": "ACME logo corner",
+    "expectedBrands": ["Acme"],
+    "expectedSource": "lexical_fallback"
+  }
+]

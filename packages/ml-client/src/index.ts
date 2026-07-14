@@ -1,5 +1,16 @@
-﻿/**
- * Typed TypeScript client for the Pulse ML FastAPI service.
- */
-
-export const ML_CLIENT_PACKAGE = "@pulse/ml-client" as const;
+﻿export {
+  MlClient,
+  MlClientError,
+} from "./client";
+export type {
+  BrandRelevanceMatch,
+  BrandRelevanceRequest,
+  BrandRelevanceResponse,
+  MlClientOptions,
+  SentimentAnalysisRequest,
+  SentimentAnalysisResponse,
+  SentimentLabel,
+  SponsorDetection,
+  SponsorDetectionRequest,
+  SponsorDetectionResponse,
+} from "./client";
