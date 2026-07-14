@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { StreamSourcedBaseSchema } from "./platform.js";
+import { StreamSourcedBaseSchema } from "./platform";
 
 /**
  * A captured video frame reference. Binary data lives in object storage;

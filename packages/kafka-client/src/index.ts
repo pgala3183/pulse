@@ -1,10 +1,10 @@
 ﻿export {
   PulseKafkaClient,
   SchemaValidationError,
-} from "./client.js";
+} from "./client";
 export type {
   ConsumeContext,
   ConsumeTypedOptions,
   PulseKafkaLogger,
   TypedMessageHandler,
-} from "./client.js";
+} from "./client";

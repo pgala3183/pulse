@@ -2,10 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   BrandMentionEventSchema,
   ChatMessageEventSchema,
+  IngestionCommandEventSchema,
   SentimentResultEventSchema,
   TranscriptSegmentEventSchema,
   VideoFrameEventSchema,
-} from "./index.js";
+} from "./index";
 
 const baseStreamFields = {
   eventId: "550e8400-e29b-41d4-a716-446655440000",
@@ -128,6 +129,24 @@ describe("BrandMentionEventSchema", () => {
 
   it("rejects a malformed payload", () => {
     const result = BrandMentionEventSchema.safeParse({ ...valid, brand: "" });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("IngestionCommandEventSchema", () => {
+  const valid = {
+    ...baseStreamFields,
+    type: "ingestion.command" as const,
+    action: "start" as const,
+    targetId: "cool_streamer",
+  };
+
+  it("accepts a valid payload", () => {
+    expect(IngestionCommandEventSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("rejects a malformed payload", () => {
+    const result = IngestionCommandEventSchema.safeParse({ ...valid, action: "pause" });
     expect(result.success).toBe(false);
   });
 });

@@ -9,3 +9,4 @@ allowBuilds:
   esbuild: true
   sharp: true
   "@apollo/protobufjs": true
+  "@swc/core": true

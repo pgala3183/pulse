@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { StreamSourcedBaseSchema } from "./platform.js";
+import { StreamSourcedBaseSchema } from "./platform";
 
 export const TranscriptSegmentEventSchema = StreamSourcedBaseSchema.extend({
   type: z.literal("transcript.segment"),

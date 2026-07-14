@@ -8,7 +8,7 @@ import type {
 } from "kafkajs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
-import { PulseKafkaClient, SchemaValidationError } from "./client.js";
+import { PulseKafkaClient, SchemaValidationError } from "./client";
 
 const SampleSchema = z.object({
   id: z.string().min(1),

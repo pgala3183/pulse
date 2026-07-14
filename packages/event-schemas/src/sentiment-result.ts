@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { StreamSourcedBaseSchema } from "./platform.js";
+import { StreamSourcedBaseSchema } from "./platform";
 
 export const SentimentSourceTypeSchema = z.enum(["chat.message", "transcript.segment"]);
 export type SentimentSourceType = z.infer<typeof SentimentSourceTypeSchema>;

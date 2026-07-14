@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { StreamSourcedBaseSchema } from "./platform.js";
+import { StreamSourcedBaseSchema } from "./platform";
 
 export const ChatMessageEventSchema = StreamSourcedBaseSchema.extend({
   type: z.literal("chat.message"),
