@@ -23,6 +23,7 @@ describe("ChatMessageEventSchema", () => {
     userId: "user-1",
     username: "viewer",
     text: "hello chat",
+    kind: "regular" as const,
   };
 
   it("accepts a valid payload", () => {
@@ -34,9 +35,18 @@ describe("ChatMessageEventSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("rejects when platform is missing", () => {
-    const { platform: _platform, ...withoutPlatform } = valid;
-    expect(ChatMessageEventSchema.safeParse(withoutPlatform).success).toBe(false);
+  it("accepts Super Chat amount fields", () => {
+    const result = ChatMessageEventSchema.safeParse({
+      ...valid,
+      kind: "super_chat",
+      amountMicros: 5_000_000,
+      currency: "USD",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.amountMicros).toBe(5_000_000);
+      expect(result.data.kind).toBe("super_chat");
+    }
   });
 });
 

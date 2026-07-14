@@ -1,8 +1,8 @@
 ﻿export { PlatformSchema, StreamSourcedBaseSchema } from "./platform";
 export type { Platform, StreamSourcedBase } from "./platform";
 
-export { ChatMessageEventSchema } from "./chat-message";
-export type { ChatMessageEvent } from "./chat-message";
+export { ChatMessageEventSchema, ChatMessageKindSchema } from "./chat-message";
+export type { ChatMessageEvent, ChatMessageKind } from "./chat-message";
 
 export { VideoFrameEventSchema } from "./video-frame";
 export type { VideoFrameEvent } from "./video-frame";
