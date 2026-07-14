@@ -27,8 +27,13 @@ export class ApiKeyGuard implements CanActivate {
       return true;
     }
 
-    const expected = this.config.apiKey;
     const request = this.getRequest(context);
+    const path = request.path ?? request.url?.split("?")[0] ?? "";
+    if (path === "/metrics" || path === "/health" || path.startsWith("/health/")) {
+      return true;
+    }
+
+    const expected = this.config.apiKey;
     const provided =
       request.header("x-api-key") ?? this.bearerToken(request.header("authorization"));
 

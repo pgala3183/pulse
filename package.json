@@ -9,7 +9,12 @@
     "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean",
+    "demo-seed": "tsx scripts/demo-seed.ts"
+  },
+  "dependencies": {
+    "@pulse/event-schemas": "workspace:*",
+    "kafkajs": "^2.2.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",
@@ -17,6 +22,7 @@
     "eslint": "^9.28.0",
     "eslint-config-prettier": "^10.1.5",
     "prettier": "^3.5.3",
+    "tsx": "^4.19.4",
     "turbo": "^2.5.4",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.33.1",

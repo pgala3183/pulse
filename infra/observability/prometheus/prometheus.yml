@@ -1,0 +1,53 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: api-gateway
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["api-gateway:3000"]
+        labels:
+          service: api-gateway
+
+  - job_name: chat-service
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["chat-service:3002"]
+        labels:
+          service: chat-service
+
+  - job_name: video-service
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["video-service:3003"]
+        labels:
+          service: video-service
+
+  - job_name: sentiment-service
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["sentiment-service:3004"]
+        labels:
+          service: sentiment-service
+
+  - job_name: analytics-service
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["analytics-service:3005"]
+        labels:
+          service: analytics-service
+
+  - job_name: recommendation-service
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["recommendation-service:3006"]
+        labels:
+          service: recommendation-service
+
+  - job_name: video-capture-service
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["video-capture-service:3007"]
+        labels:
+          service: video-capture-service

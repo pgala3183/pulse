@@ -1,51 +1,8 @@
-# Local stack — service names are DNS names (see ADR 0002-service-discovery)
-services:
-  api-gateway:
-    build: ../../apps/api-gateway
-    environment:
-      DEPLOYMENT_ENV: compose
-      PORT: "3000"
-      ML_SERVICE_URL: http://ml-service:8000
-      KAFKA_BROKERS: kafka:9092
-    ports:
-      - "3000:3000"
-    depends_on:
-      - kafka
-      - ml-service
-
-  chat-service:
-    environment:
-      DEPLOYMENT_ENV: compose
-      KAFKA_BROKERS: kafka:9092
-
-  video-service:
-    environment:
-      DEPLOYMENT_ENV: compose
-      ML_SERVICE_URL: http://ml-service:8000
-      KAFKA_BROKERS: kafka:9092
-
-  sentiment-service:
-    environment:
-      DEPLOYMENT_ENV: compose
-      ML_SERVICE_URL: http://ml-service:8000
-      KAFKA_BROKERS: kafka:9092
-
-  analytics-service:
-    environment:
-      DEPLOYMENT_ENV: compose
-      KAFKA_BROKERS: kafka:9092
-
-  recommendation-service:
-    environment:
-      DEPLOYMENT_ENV: compose
-      KAFKA_BROKERS: kafka:9092
-
-  ml-service:
-    build: ../../apps/ml-service
-    ports:
-      - "8000:8000"
-
-  kafka:
-    image: bitnami/kafka:latest
-    ports:
-      - "9092:9092"
+# Prefer the root compose file:
+#   docker compose -f ../../docker-compose.yml up --build
+#   make -C ../.. up
+#
+# This file remains as a thin pointer for paths that still reference
+# infra/docker/docker-compose.yml.
+include:
+  - path: ../../docker-compose.yml

@@ -20,6 +20,7 @@
     "@pulse/event-schemas": "workspace:*",
     "@pulse/kafka-client": "workspace:*",
     "@pulse/ml-client": "workspace:*",
+    "@pulse/observability": "workspace:*",
     "drizzle-orm": "^0.44.2",
     "ioredis": "^5.6.1",
     "kafkajs": "^2.2.4",

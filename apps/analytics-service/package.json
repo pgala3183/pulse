@@ -19,6 +19,7 @@
     "@pulse/config": "workspace:*",
     "@pulse/event-schemas": "workspace:*",
     "@pulse/kafka-client": "workspace:*",
+    "@pulse/observability": "workspace:*",
     "drizzle-orm": "^0.44.2",
     "kafkajs": "^2.2.4",
     "postgres": "^3.4.7",

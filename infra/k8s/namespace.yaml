@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pulse
+---
+# Apply order: namespace → configs → services → workloads
+# kubectl apply -f infra/k8s/
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pulse-observability
+  namespace: pulse
+data:
+  OTEL_EXPORTER_ZIPKIN_ENDPOINT: http://zipkin.pulse.svc.cluster.local:9411/api/v2/spans
+  KAFKA_BROKERS: kafka.pulse.svc.cluster.local:9092

@@ -19,6 +19,7 @@
     "@pulse/config": "workspace:*",
     "@pulse/event-schemas": "workspace:*",
     "@pulse/kafka-client": "workspace:*",
+    "@pulse/observability": "workspace:*",
     "@pulse/platform-adapters": "workspace:*",
     "kafkajs": "^2.2.4",
     "reflect-metadata": "^0.2.2",

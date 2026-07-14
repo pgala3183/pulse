@@ -1,6 +1,7 @@
 ﻿import { Module } from "@nestjs/common";
 import { PulseKafkaClient } from "@pulse/kafka-client";
 import { MlClient } from "@pulse/ml-client";
+import { ObservabilityModule } from "@pulse/observability";
 import { Kafka } from "kafkajs";
 import {
   APP_CONFIG,
@@ -19,6 +20,7 @@ import {
 import { InMemorySentimentCache } from "./redis/cache";
 
 @Module({
+  imports: [ObservabilityModule.forRoot({ serviceName: "sentiment-service" })],
   providers: [
     SentimentProcessor,
     SentimentConsumers,

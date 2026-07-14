@@ -1,0 +1,135 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-typecheck-test:
+    name: Lint, typecheck, test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck / build
+        run: pnpm build
+
+      - name: Unit & integration tests
+        run: pnpm test
+        env:
+          OTEL_SDK_DISABLED: "true"
+
+  docker-build-push:
+    name: Docker build & push
+    needs: lint-typecheck-test
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - app: api-gateway
+            dockerfile: infra/docker/Dockerfile.nestjs
+            build_args: APP=api-gateway
+          - app: chat-service
+            dockerfile: infra/docker/Dockerfile.nestjs
+            build_args: APP=chat-service
+          - app: video-service
+            dockerfile: infra/docker/Dockerfile.nestjs
+            build_args: APP=video-service
+          - app: sentiment-service
+            dockerfile: infra/docker/Dockerfile.nestjs
+            build_args: APP=sentiment-service
+          - app: analytics-service
+            dockerfile: infra/docker/Dockerfile.nestjs
+            build_args: APP=analytics-service
+          - app: recommendation-service
+            dockerfile: infra/docker/Dockerfile.nestjs
+            build_args: APP=recommendation-service
+          - app: video-capture-service
+            dockerfile: infra/docker/Dockerfile.nestjs
+            build_args: APP=video-capture-service
+          - app: web
+            dockerfile: infra/docker/Dockerfile.web
+            build_args: ""
+          - app: ml-service
+            dockerfile: infra/docker/Dockerfile.ml
+            build_args: ""
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/pulse-${{ matrix.app }}:latest
+            ghcr.io/${{ github.repository_owner }}/pulse-${{ matrix.app }}:${{ github.sha }}
+          build-args: ${{ matrix.build_args }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-k8s:
+    name: Deploy to Kubernetes
+    needs: docker-build-push
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Apply Kubernetes manifests
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          if [ -z "$KUBE_CONFIG" ]; then
+            echo "KUBE_CONFIG secret not set — skipping deploy. Manifests are under infra/k8s/."
+            exit 0
+          fi
+          mkdir -p ~/.kube
+          echo "$KUBE_CONFIG" | base64 -d > ~/.kube/config
+          kubectl apply -f infra/k8s/namespace.yaml
+          kubectl apply -f infra/k8s/
+          OWNER="${{ github.repository_owner }}"
+          SHA="${{ github.sha }}"
+          kubectl -n pulse set image deployment/api-gateway "api-gateway=ghcr.io/${OWNER}/pulse-api-gateway:${SHA}" || true
+          kubectl -n pulse set image deployment/chat-service "chat-service=ghcr.io/${OWNER}/pulse-chat-service:${SHA}" || true
+          kubectl -n pulse set image deployment/ml-service "ml-service=ghcr.io/${OWNER}/pulse-ml-service:${SHA}" || true
+          kubectl -n pulse rollout status deployment/api-gateway --timeout=180s || true

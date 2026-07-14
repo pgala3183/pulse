@@ -1,6 +1,7 @@
 ﻿import { Module } from "@nestjs/common";
 import { PulseKafkaClient } from "@pulse/kafka-client";
 import { MlClient } from "@pulse/ml-client";
+import { ObservabilityModule } from "@pulse/observability";
 import { Kafka } from "kafkajs";
 import { APP_CONFIG, loadVideoServiceConfig, type VideoServiceConfig } from "./config";
 import { InMemorySponsorDetectionRepository } from "./db/repository";
@@ -13,6 +14,7 @@ import {
 } from "./processing/video-frame.processor";
 
 @Module({
+  imports: [ObservabilityModule.forRoot({ serviceName: "video-service" })],
   providers: [
     VideoFrameProcessor,
     VideoFrameConsumer,

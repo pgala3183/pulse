@@ -48,6 +48,7 @@ describe("API gateway integration", () => {
     process.env["PULSE_API_KEY"] = API_KEY;
     process.env["KAFKA_BRIDGE_DISABLED"] = "true";
     process.env["KAFKA_PUBLISH_DISABLED"] = "false";
+    process.env["OTEL_SDK_DISABLED"] = "true";
 
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],

@@ -11,6 +11,7 @@ import {
   type SentimentResultEvent,
 } from "@pulse/event-schemas";
 import { PulseKafkaClient } from "@pulse/kafka-client";
+import { PulseMetrics } from "@pulse/observability";
 import { PubSub } from "graphql-subscriptions";
 import { Kafka } from "kafkajs";
 import { APP_CONFIG, type ApiGatewayConfig } from "../config";
@@ -29,6 +30,7 @@ export class LiveEventsBridge implements OnModuleInit, OnModuleDestroy {
     @Inject(GRAPHQL_PUB_SUB) private readonly pubSub: PubSub,
     @Inject(APP_CONFIG) private readonly config: ApiGatewayConfig,
     private readonly store: GatewayStore,
+    private readonly metrics: PulseMetrics,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -108,6 +110,7 @@ export class LiveEventsBridge implements OnModuleInit, OnModuleDestroy {
 
   private async publishSentiment(event: SentimentResultEvent): Promise<void> {
     const mapped = this.store.addSentiment(event);
+    this.metrics.recordSentiment(event.platform, event.label);
     await this.pubSub.publish(LIVE_CHANNELS.sentiment(event.streamId), {
       sentimentUpdates: mapped,
     });
@@ -115,6 +118,7 @@ export class LiveEventsBridge implements OnModuleInit, OnModuleDestroy {
 
   private async publishBrandMention(event: BrandMentionEvent): Promise<void> {
     const mapped = this.store.addBrandMention(event);
+    this.metrics.recordBrandMention(event.platform, event.brand);
     await this.pubSub.publish(LIVE_CHANNELS.brandMention(event.streamId), {
       brandMentionUpdates: mapped,
     });
@@ -122,6 +126,7 @@ export class LiveEventsBridge implements OnModuleInit, OnModuleDestroy {
 
   private async publishChatMessage(event: ChatMessageEvent): Promise<void> {
     const mapped = this.store.addChatMessage(event);
+    this.metrics.recordChatMessage(event.platform);
     await this.pubSub.publish(LIVE_CHANNELS.chat(event.streamId), {
       chatMessageUpdates: mapped,
     });
@@ -129,6 +134,7 @@ export class LiveEventsBridge implements OnModuleInit, OnModuleDestroy {
 
   private async publishRecommendation(event: RecommendationEvent): Promise<void> {
     const mapped = this.store.addRecommendation(event);
+    this.metrics.recordRecommendation(event.platform, event.severity);
     await this.pubSub.publish(LIVE_CHANNELS.recommendation(event.streamId), {
       recommendationUpdates: mapped,
     });

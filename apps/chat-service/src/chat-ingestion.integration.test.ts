@@ -40,6 +40,7 @@ describe("ChatIngestionService integration", () => {
 
   beforeAll(async () => {
     process.env["CHAT_KAFKA_CONSUMER_DISABLED"] = "true";
+    process.env["OTEL_SDK_DISABLED"] = "true";
     twitchAdapter = new FakeChatSource("twitch");
     youtubeAdapter = new FakeChatSource("youtube");
 

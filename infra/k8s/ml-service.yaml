@@ -1,5 +1,30 @@
 # Example in-cluster DNS: http://ml-service.pulse.svc.cluster.local:8000
 # See docs/adr/0002-service-discovery.md
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-service
+  namespace: pulse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ml-service
+  template:
+    metadata:
+      labels:
+        app: ml-service
+    spec:
+      containers:
+        - name: ml-service
+          image: ghcr.io/pgala3183/pulse-ml-service:latest
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+---
 apiVersion: v1
 kind: Service
 metadata:

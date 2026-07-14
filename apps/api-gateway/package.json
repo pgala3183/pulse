@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "@pulse/api-gateway",
   "version": "0.0.0",
   "private": true,
@@ -24,6 +24,7 @@
     "@pulse/config": "workspace:*",
     "@pulse/event-schemas": "workspace:*",
     "@pulse/kafka-client": "workspace:*",
+    "@pulse/observability": "workspace:*",
     "graphql": "^16.11.0",
     "graphql-subscriptions": "^3.0.0",
     "graphql-ws": "^6.0.4",

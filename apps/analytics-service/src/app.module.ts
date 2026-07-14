@@ -1,5 +1,6 @@
 ﻿import { Module } from "@nestjs/common";
 import { PulseKafkaClient } from "@pulse/kafka-client";
+import { ObservabilityModule } from "@pulse/observability";
 import { Kafka } from "kafkajs";
 import {
   APP_CONFIG,
@@ -15,6 +16,7 @@ import {
 } from "./processing/analytics.processor";
 
 @Module({
+  imports: [ObservabilityModule.forRoot({ serviceName: "analytics-service" })],
   providers: [
     AnalyticsProcessor,
     AnalyticsConsumers,

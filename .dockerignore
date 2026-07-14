@@ -1,0 +1,15 @@
+node_modules
+**/node_modules
+.git
+.next
+**/.next
+dist
+**/dist
+coverage
+**/coverage
+*.md
+!docs/adr/*.md
+agent-transcripts
+.cursor
+.env
+.env.*

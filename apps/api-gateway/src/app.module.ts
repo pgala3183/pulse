@@ -3,6 +3,7 @@ import { Module } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ThrottlerModule } from "@nestjs/throttler";
+import { ObservabilityModule } from "@pulse/observability";
 import { PubSub } from "graphql-subscriptions";
 import { ApiKeyGuard } from "./auth/api-key.guard";
 import { GqlThrottlerGuard } from "./auth/gql-throttler.guard";
@@ -19,6 +20,7 @@ import { GatewayStore } from "./store/gateway.store";
 
 @Module({
   imports: [
+    ObservabilityModule.forRoot({ serviceName: "api-gateway" }),
     ThrottlerModule.forRoot([
       {
         name: "default",
