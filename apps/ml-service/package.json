@@ -1,0 +1,13 @@
+{
+  "name": "@pulse/ml-service",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Python/FastAPI ML service — sentiment, sponsor detection, transcription",
+  "scripts": {
+    "dev": "uvicorn app.main:app --reload --port 8000",
+    "build": "echo \"No build step for Python service\"",
+    "lint": "echo \"Lint via ruff when configured\"",
+    "test": "echo \"Tests via pytest when configured\"",
+    "clean": "echo \"clean\""
+  }
+}

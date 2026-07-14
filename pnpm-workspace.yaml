@@ -1,0 +1,11 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+strictPeerDependencies: false
+autoInstallPeers: true
+
+allowBuilds:
+  esbuild: true
+  sharp: true
+  "@apollo/protobufjs": true
