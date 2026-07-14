@@ -7,3 +7,4 @@ ADRs document significant technical decisions for Pulse. Add numbered ADRs as de
 | [0001](./0001-event-contracts.md) | Shared event contracts and platform field placement |
 | [0002](./0002-drizzle-orm.md) | Persist detections and analysis results with Drizzle ORM |
 | [0003](./0003-sponsor-relevance-scoring.md) | Sponsor-relevance scoring |
+| [0004](./0004-analytics-metrics-and-windowing.md) | Analytics metrics definitions and windowing |

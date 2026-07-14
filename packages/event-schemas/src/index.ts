@@ -36,5 +36,17 @@ export {
 } from "./ingestion-command";
 export type { IngestionAction, IngestionCommandEvent } from "./ingestion-command";
 
+export {
+  AnalyticsRollupEventSchema,
+  AnalyticsWindowTypeSchema,
+} from "./analytics-rollup";
+export type { AnalyticsRollupEvent, AnalyticsWindowType } from "./analytics-rollup";
+
+export {
+  RecommendationEventSchema,
+  RecommendationSeveritySchema,
+} from "./recommendation";
+export type { RecommendationEvent, RecommendationSeverity } from "./recommendation";
+
 export { KafkaTopics } from "./topics";
 export type { KafkaTopic } from "./topics";

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  AnalyticsRollupEventSchema,
   BrandMentionEventSchema,
   ChatMessageEventSchema,
   IngestionCommandEventSchema,
@@ -158,5 +159,32 @@ describe("IngestionCommandEventSchema", () => {
   it("rejects a malformed payload", () => {
     const result = IngestionCommandEventSchema.safeParse({ ...valid, action: "pause" });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("AnalyticsRollupEventSchema", () => {
+  it("accepts a valid rollup", () => {
+    const result = AnalyticsRollupEventSchema.safeParse({
+      eventId: "550e8400-e29b-41d4-a716-446655440000",
+      type: "analytics.rollup",
+      platform: "twitch",
+      streamId: "stream-123",
+      windowType: "1m",
+      windowStart: "2026-07-13T22:00:00.000Z",
+      windowEnd: "2026-07-13T22:01:00.000Z",
+      occurredAt: "2026-07-13T22:00:30.000Z",
+      chatVolume: 3,
+      paidChatVolume: 1,
+      sentimentSampleCount: 2,
+      averageSentimentScore: 0,
+      positiveCount: 1,
+      neutralCount: 0,
+      negativeCount: 1,
+      brandMentionCount: 1,
+      uniqueBrands: ["Acme"],
+      averageSponsorRelevance: 0.5,
+      engagementScore: 6,
+    });
+    expect(result.success).toBe(true);
   });
 });
