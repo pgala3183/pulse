@@ -1,7 +1,8 @@
 # Analytics metrics (dashboard contract)
 
-This document is the consumer-facing contract for `analytics-service` rollups. See also
-[ADR 0004](./adr/0004-analytics-metrics-and-windowing.md).
+This document is the consumer-facing contract for `analytics-service` rollups. Normative
+decision record: [ADR 0004](./adr/0004-analytics-metrics-and-windowing.md). Sponsor relevance
+field semantics: [ADR 0003](./adr/0003-sponsor-relevance-scoring.md).
 
 ## Windows
 
