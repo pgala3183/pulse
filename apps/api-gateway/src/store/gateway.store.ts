@@ -1,13 +1,22 @@
 import { Injectable } from "@nestjs/common";
-import type { BrandMentionEvent, SentimentResultEvent } from "@pulse/event-schemas";
+import type {
+  BrandMentionEvent,
+  ChatMessageEvent,
+  RecommendationEvent,
+  SentimentResultEvent,
+} from "@pulse/event-schemas";
 import {
+  ChatMessageKind,
   Platform,
+  RecommendationSeverity,
   SentimentLabel,
   StreamIngestionStatus,
 } from "../graphql/enums";
 import type {
   AnalyticsSummary,
   BrandMention,
+  ChatMessage,
+  Recommendation,
   SentimentResult,
   StreamIngestion,
 } from "../graphql/models";
@@ -17,6 +26,8 @@ export class GatewayStore {
   private readonly ingestions = new Map<string, StreamIngestion>();
   private readonly sentiments = new Map<string, SentimentResult[]>();
   private readonly brandMentions = new Map<string, BrandMention[]>();
+  private readonly chatMessages = new Map<string, ChatMessage[]>();
+  private readonly recommendations = new Map<string, Recommendation[]>();
 
   upsertIngestion(ingestion: StreamIngestion): StreamIngestion {
     this.ingestions.set(this.key(ingestion.platform, ingestion.streamId), ingestion);
@@ -74,9 +85,36 @@ export class GatewayStore {
     return list.slice(-limit).reverse();
   }
 
+  addChatMessage(event: ChatMessageEvent): ChatMessage {
+    const mapped = this.mapChatMessage(event);
+    const list = this.chatMessages.get(event.streamId) ?? [];
+    list.push(mapped);
+    this.chatMessages.set(event.streamId, list.slice(-500));
+    return mapped;
+  }
+
+  listChatMessages(streamId: string, limit = 50): ChatMessage[] {
+    const list = this.chatMessages.get(streamId) ?? [];
+    return list.slice(-limit).reverse();
+  }
+
+  addRecommendation(event: RecommendationEvent): Recommendation {
+    const mapped = this.mapRecommendation(event);
+    const list = this.recommendations.get(event.streamId) ?? [];
+    list.push(mapped);
+    this.recommendations.set(event.streamId, list.slice(-200));
+    return mapped;
+  }
+
+  listRecommendations(streamId: string, limit = 50): Recommendation[] {
+    const list = this.recommendations.get(streamId) ?? [];
+    return list.slice(-limit).reverse();
+  }
+
   getAnalyticsSummary(streamId: string, platform: Platform): AnalyticsSummary {
     const sentiments = this.sentiments.get(streamId) ?? [];
     const mentions = this.brandMentions.get(streamId) ?? [];
+    const chats = this.chatMessages.get(streamId) ?? [];
     const averageSentimentScore =
       sentiments.length === 0
         ? 0
@@ -94,12 +132,13 @@ export class GatewayStore {
     const timestamps = [
       ...sentiments.map((item) => item.occurredAt),
       ...mentions.map((item) => item.occurredAt),
+      ...chats.map((item) => item.occurredAt),
     ].sort();
 
     return {
       streamId,
       platform,
-      chatMessageCount: sentiments.filter((item) => item.sourceType === "chat.message").length,
+      chatMessageCount: chats.length,
       sentimentSampleCount: sentiments.length,
       averageSentimentScore,
       brandMentionCount: mentions.length,
@@ -136,6 +175,37 @@ export class GatewayStore {
       confidence: event.confidence,
       startMs: event.startMs ?? null,
       endMs: event.endMs ?? null,
+    };
+  }
+
+  private mapChatMessage(event: ChatMessageEvent): ChatMessage {
+    return {
+      eventId: event.eventId,
+      platform: event.platform as Platform,
+      streamId: event.streamId,
+      occurredAt: event.occurredAt,
+      messageId: event.messageId,
+      userId: event.userId,
+      username: event.username,
+      text: event.text,
+      kind: event.kind as ChatMessageKind,
+      amountMicros: event.amountMicros ?? null,
+      currency: event.currency ?? null,
+    };
+  }
+
+  private mapRecommendation(event: RecommendationEvent): Recommendation {
+    return {
+      eventId: event.eventId,
+      platform: event.platform as Platform,
+      streamId: event.streamId,
+      occurredAt: event.occurredAt,
+      code: event.code,
+      severity: event.severity as RecommendationSeverity,
+      title: event.title,
+      summary: event.summary,
+      relatedBrands: event.relatedBrands,
+      windowType: event.windowType ?? null,
     };
   }
 

@@ -19,6 +19,21 @@ export enum SentimentLabel {
   NEGATIVE = "negative",
 }
 
+export enum ChatMessageKind {
+  REGULAR = "regular",
+  SUPER_CHAT = "super_chat",
+  MEMBERSHIP = "membership",
+  OTHER = "other",
+}
+
+export enum RecommendationSeverity {
+  INFO = "info",
+  WARNING = "warning",
+  ACTION = "action",
+}
+
 registerEnumType(Platform, { name: "Platform" });
 registerEnumType(StreamIngestionStatus, { name: "StreamIngestionStatus" });
 registerEnumType(SentimentLabel, { name: "SentimentLabel" });
+registerEnumType(ChatMessageKind, { name: "ChatMessageKind" });
+registerEnumType(RecommendationSeverity, { name: "RecommendationSeverity" });

@@ -3,7 +3,12 @@ import { INestApplication } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { PubSub } from "graphql-subscriptions";
 import request from "supertest";
-import type { BrandMentionEvent, SentimentResultEvent } from "@pulse/event-schemas";
+import type {
+  BrandMentionEvent,
+  ChatMessageEvent,
+  RecommendationEvent,
+  SentimentResultEvent,
+} from "@pulse/event-schemas";
 import { AppModule } from "../app.module";
 import { LiveEventsBridge, PULSE_KAFKA_CLIENT } from "../kafka/live-events.bridge";
 import { GRAPHQL_PUB_SUB } from "../pubsub.tokens";
@@ -219,6 +224,55 @@ describe("API gateway integration", () => {
       sentimentSampleCount: 1,
       brandMentionCount: 1,
       topBrands: ["Acme"],
+    });
+  });
+
+  it("queries live chat and recommendations", async () => {
+    const chatEvent: ChatMessageEvent = {
+      eventId: "550e8400-e29b-41d4-a716-446655440030",
+      type: "chat.message",
+      platform: "twitch",
+      streamId: "stream-chat",
+      occurredAt: "2026-07-13T21:10:00.000Z",
+      messageId: "msg-1",
+      userId: "u1",
+      username: "viewer",
+      text: "let's go",
+      kind: "regular",
+    };
+    const recEvent: RecommendationEvent = {
+      eventId: "550e8400-e29b-41d4-a716-446655440031",
+      type: "recommendation.generated",
+      platform: "twitch",
+      streamId: "stream-chat",
+      occurredAt: "2026-07-13T21:10:01.000Z",
+      code: "engage_chat",
+      severity: "action",
+      title: "Spike in chat volume",
+      summary: "Acknowledge the surge with a callout.",
+      relatedBrands: [],
+    };
+
+    await bridge.ingestChatMessageEvent(chatEvent);
+    await bridge.ingestRecommendationEvent(recEvent);
+
+    const chat = await graphql<{ liveChat: Array<{ username: string; text: string }> }>(
+      app,
+      `query { liveChat(streamId: "stream-chat") { username text } }`,
+    );
+    expect(chat.errors).toBeUndefined();
+    expect(chat.data?.liveChat[0]).toMatchObject({ username: "viewer", text: "let's go" });
+
+    const recs = await graphql<{
+      liveRecommendations: Array<{ code: string; severity: string }>;
+    }>(
+      app,
+      `query { liveRecommendations(streamId: "stream-chat") { code severity } }`,
+    );
+    expect(recs.errors).toBeUndefined();
+    expect(recs.data?.liveRecommendations[0]).toMatchObject({
+      code: "engage_chat",
+      severity: "ACTION",
     });
   });
 

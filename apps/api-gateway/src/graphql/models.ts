@@ -1,5 +1,11 @@
 import { Field, Float, Int, ObjectType } from "@nestjs/graphql";
-import { Platform, SentimentLabel, StreamIngestionStatus } from "./enums";
+import {
+  ChatMessageKind,
+  Platform,
+  RecommendationSeverity,
+  SentimentLabel,
+  StreamIngestionStatus,
+} from "./enums";
 
 @ObjectType()
 export class StreamIngestion {
@@ -83,6 +89,75 @@ export class BrandMention {
 
   @Field(() => Int, { nullable: true })
   endMs?: number | null;
+}
+
+@ObjectType()
+export class ChatMessage {
+  @Field()
+  eventId!: string;
+
+  @Field(() => Platform)
+  platform!: Platform;
+
+  @Field()
+  streamId!: string;
+
+  @Field()
+  occurredAt!: string;
+
+  @Field()
+  messageId!: string;
+
+  @Field()
+  userId!: string;
+
+  @Field()
+  username!: string;
+
+  @Field()
+  text!: string;
+
+  @Field(() => ChatMessageKind)
+  kind!: ChatMessageKind;
+
+  @Field(() => Int, { nullable: true })
+  amountMicros?: number | null;
+
+  @Field(() => String, { nullable: true })
+  currency?: string | null;
+}
+
+@ObjectType()
+export class Recommendation {
+  @Field()
+  eventId!: string;
+
+  @Field(() => Platform)
+  platform!: Platform;
+
+  @Field()
+  streamId!: string;
+
+  @Field()
+  occurredAt!: string;
+
+  @Field()
+  code!: string;
+
+  @Field(() => RecommendationSeverity)
+  severity!: RecommendationSeverity;
+
+  @Field()
+  title!: string;
+
+  @Field()
+  summary!: string;
+
+  @Field(() => [String])
+  relatedBrands!: string[];
+
+  @Field(() => String, { nullable: true })
+  windowType?: string | null;
 }
 
 @ObjectType()

@@ -24,6 +24,8 @@ import { StartStreamIngestionInput, StopStreamIngestionInput } from "./inputs";
 import {
   AnalyticsSummary,
   BrandMention,
+  ChatMessage,
+  Recommendation,
   SentimentResult,
   StreamIngestion,
 } from "./models";
@@ -64,6 +66,22 @@ export class GatewayResolver {
     @Args("limit", { type: () => Int, nullable: true, defaultValue: 50 }) limit: number,
   ): BrandMention[] {
     return this.store.listBrandMentions(streamId, limit);
+  }
+
+  @Query(() => [ChatMessage])
+  liveChat(
+    @Args("streamId") streamId: string,
+    @Args("limit", { type: () => Int, nullable: true, defaultValue: 50 }) limit: number,
+  ): ChatMessage[] {
+    return this.store.listChatMessages(streamId, limit);
+  }
+
+  @Query(() => [Recommendation])
+  liveRecommendations(
+    @Args("streamId") streamId: string,
+    @Args("limit", { type: () => Int, nullable: true, defaultValue: 50 }) limit: number,
+  ): Recommendation[] {
+    return this.store.listRecommendations(streamId, limit);
   }
 
   @Query(() => AnalyticsSummary)
@@ -160,6 +178,22 @@ export class GatewayResolver {
   })
   brandMentionUpdates(@Args("streamId") streamId: string) {
     return this.pubSub.asyncIterableIterator(LIVE_CHANNELS.brandMention(streamId));
+  }
+
+  @Subscription(() => ChatMessage, {
+    name: "chatMessageUpdates",
+    description: "Live chat messages for a stream (Kafka → graphql-ws)",
+  })
+  chatMessageUpdates(@Args("streamId") streamId: string) {
+    return this.pubSub.asyncIterableIterator(LIVE_CHANNELS.chat(streamId));
+  }
+
+  @Subscription(() => Recommendation, {
+    name: "recommendationUpdates",
+    description: "Live operator recommendations for a stream",
+  })
+  recommendationUpdates(@Args("streamId") streamId: string) {
+    return this.pubSub.asyncIterableIterator(LIVE_CHANNELS.recommendation(streamId));
   }
 
   private async publishIngestionCommand(command: IngestionCommandEvent): Promise<void> {

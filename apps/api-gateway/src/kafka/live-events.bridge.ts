@@ -1,9 +1,13 @@
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import {
   BrandMentionEventSchema,
+  ChatMessageEventSchema,
   KafkaTopics,
+  RecommendationEventSchema,
   SentimentResultEventSchema,
   type BrandMentionEvent,
+  type ChatMessageEvent,
+  type RecommendationEvent,
   type SentimentResultEvent,
 } from "@pulse/event-schemas";
 import { PulseKafkaClient } from "@pulse/kafka-client";
@@ -56,6 +60,28 @@ export class LiveEventsBridge implements OnModuleInit, OnModuleDestroy {
         { groupId: `${groupId}-brand` },
       ),
     );
+
+    this.stoppers.push(
+      await this.kafkaClient.consumeTyped(
+        KafkaTopics.CHAT_MESSAGES,
+        ChatMessageEventSchema,
+        async (event) => {
+          await this.publishChatMessage(event);
+        },
+        { groupId: `${groupId}-chat` },
+      ),
+    );
+
+    this.stoppers.push(
+      await this.kafkaClient.consumeTyped(
+        KafkaTopics.RECOMMENDATIONS,
+        RecommendationEventSchema,
+        async (event) => {
+          await this.publishRecommendation(event);
+        },
+        { groupId: `${groupId}-recommendations` },
+      ),
+    );
   }
 
   async onModuleDestroy(): Promise<void> {
@@ -72,6 +98,14 @@ export class LiveEventsBridge implements OnModuleInit, OnModuleDestroy {
     await this.publishBrandMention(event);
   }
 
+  async ingestChatMessageEvent(event: ChatMessageEvent): Promise<void> {
+    await this.publishChatMessage(event);
+  }
+
+  async ingestRecommendationEvent(event: RecommendationEvent): Promise<void> {
+    await this.publishRecommendation(event);
+  }
+
   private async publishSentiment(event: SentimentResultEvent): Promise<void> {
     const mapped = this.store.addSentiment(event);
     await this.pubSub.publish(LIVE_CHANNELS.sentiment(event.streamId), {
@@ -83,6 +117,20 @@ export class LiveEventsBridge implements OnModuleInit, OnModuleDestroy {
     const mapped = this.store.addBrandMention(event);
     await this.pubSub.publish(LIVE_CHANNELS.brandMention(event.streamId), {
       brandMentionUpdates: mapped,
+    });
+  }
+
+  private async publishChatMessage(event: ChatMessageEvent): Promise<void> {
+    const mapped = this.store.addChatMessage(event);
+    await this.pubSub.publish(LIVE_CHANNELS.chat(event.streamId), {
+      chatMessageUpdates: mapped,
+    });
+  }
+
+  private async publishRecommendation(event: RecommendationEvent): Promise<void> {
+    const mapped = this.store.addRecommendation(event);
+    await this.pubSub.publish(LIVE_CHANNELS.recommendation(event.streamId), {
+      recommendationUpdates: mapped,
     });
   }
 }
